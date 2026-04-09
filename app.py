@@ -45,20 +45,23 @@ def clean_text():
         }
     """
     try:
-        # TODO: Get JSON data from request
-        # TODO: Extract URL from the JSON
-        # TODO: Validate URL (should be .txt)
-        # TODO: Use preprocessor.fetch_from_url() 
-        # TODO: Clean the text with preprocessor.clean_gutenberg_text()
-        # TODO: Normalize with preprocessor.normalize_text()
-        # TODO: Get statistics with preprocessor.get_text_statistics()
-        # TODO: Create summary with preprocessor.create_summary()
-        # TODO: Return JSON response
-        
+        data = request.get_json()
+        if not data or 'url' not in data:
+            return jsonify({"success": False, "error": "Missing 'url' in request body"}), 400
+
+        url = data['url']
+        raw_text = preprocessor.fetch_from_url(url)
+        cleaned = preprocessor.clean_gutenberg_text(raw_text)
+        cleaned = preprocessor.normalize_text(cleaned)
+        statistics = preprocessor.get_text_statistics(cleaned)
+        summary = preprocessor.create_summary(cleaned)
+
         return jsonify({
-            "success": False,
-            "error": "Not implemented yet - complete this for Part 3!"
-        }), 501
+            "success": True,
+            "cleaned_text": cleaned,
+            "statistics": statistics,
+            "summary": summary,
+        })
         
     except Exception as e:
         return jsonify({
@@ -88,11 +91,12 @@ def analyze_text():
         # TODO: Extract text from the JSON
         # TODO: Get statistics with preprocessor.get_text_statistics()
         # TODO: Return JSON response
-        
-        return jsonify({
-            "success": False,
-            "error": "Not implemented yet - complete this for Part 3!"
-        }), 501
+        data = request.get_json()
+        if not data or 'text' not in data:
+            return jsonify({"success": False, "error": "Missing 'text' in request body"}), 400
+
+        statistics = preprocessor.get_text_statistics(data['text'])
+        return jsonify({"success": True, "statistics": statistics})
         
     except Exception as e:
         return jsonify({
